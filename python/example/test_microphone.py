@@ -7,11 +7,20 @@
 import argparse
 import queue
 import sys
+import json
 import sounddevice as sd
+# import soundfile as sf
+# mydata = sd.rec(int(10*44100),44100,channels=2, blocking=True)
+# sf.write('tone.wav', mydata, 44100) 
+# sys.exit(0)
 
 from vosk import Model, KaldiRecognizer
 
 q = queue.Queue()
+
+def json_to_string(json_value):
+    json_str = json.loads(json_value)
+    return json_str
 
 def int_or_str(text):
     """Helper function for argument parsing."""
@@ -76,9 +85,11 @@ try:
         while True:
             data = q.get()
             if rec.AcceptWaveform(data):
-                print(rec.Result())
-            else:
-                print(rec.PartialResult())
+                string_value = json_to_string(rec.Result())['text']
+                if string_value.strip():
+                    print(string_value)
+            # else:
+                # print(rec.PartialResult())
             if dump_fn is not None:
                 dump_fn.write(data)
 
